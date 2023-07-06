@@ -81,7 +81,7 @@
                     onclick="myFunction()"
                     name="loginsubmit"
                   >
-                    Login
+                    Login with Google
                   </button>
                 </div>
               </div>
@@ -99,14 +99,7 @@
     <script>
       //for typing the email and password properly
       function myFunction() {
-        if (
-          document.getElementById("typeEmailX").value.includes("@") &&
-          document.getElementById("typePasswordX").value.includes("")
-        ) {
-          window.location.href = "http://localhost:3000/mainpage";
-        } else {
-          document.querySelector(".error").style.visibility = "visible";
-        }
+        window.location.href = "/auth/google";
       }
       //For pressing the enter key
       document
