@@ -1,3 +1,6 @@
+const session = require("express-session");
+const passport = require("passport");
+const GoogleStrategy = require("passport-google-oauth").OAuth2Strategy;
 const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
@@ -5,9 +8,41 @@ const dotenv = require("dotenv").config();
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
+app.use(
+  session({
+    secret: "navya",
+    resave: false,
+    saveUninitialized: false,
+  })
+);
+
+app.use(passport.initialize());
+passport.use(
+  new GoogleStrategy(
+    {
+      clientID: process.env.clientid,
+      clientSecret: process.env.clientsecret,
+      callbackURL: "/auth/google/callback",
+    },
+    (accessToken, refreshToken, profile, done) => {
+      // No authentication process needed
+      done(null, profile); // Pass the user profile to the next step
+    }
+  )
+);
+
+passport.serializeUser((user, done) => {
+  done(null, user);
+});
+
+passport.deserializeUser((user, done) => {
+  done(null, user);
+});
+
 // const uri =
 //   "mongodb+srv://navyajain030:HvMqiOrfBkdAIfC7@cluster0.qwfzymp.mongodb.net/FeedbackSystem";
 // const dbName = "FeedbackSystem";
+
 mongoose
   .connect(
     "mongodb+srv://" +
@@ -92,6 +127,21 @@ app.get("/mainpage", function (req, res) {
 app.get("/login", function (req, res) {
   res.sendFile(__dirname + "/login.html");
 });
+
+app.get(
+  "/auth/google",
+  passport.authenticate("google", { scope: ["profile", "email"] })
+);
+
+app.get(
+  "/auth/google/callback",
+  passport.authenticate("google"),
+  (req, res) => {
+    // Redirect to the main page
+    res.redirect("/mainpage");
+  }
+);
+
 app.get("/feedback", function (req, res) {
   res.sendFile(__dirname + "/feedback.html");
 });
@@ -139,3 +189,4 @@ if (port == null || port == "") {
 app.listen(port, function () {
   console.log("Server started");
 });
+
